@@ -81,7 +81,6 @@ def Page():
     selected_rows, set_selected_rows = solara.use_state(None)
 
     def _retrieve_classes():
-        print(BASE_API.load_student_info())
         classes_response = BASE_API.load_student_classes()
         formatted_classes = []
 
@@ -129,6 +128,7 @@ def Page():
                     show_select=True,
                     v_model=selected_rows,
                     on_v_model=set_selected_rows,
+                    item_key="code",
                     headers=[
                         {"text": "Date", "value": "date", "sortable": True},
                         {
