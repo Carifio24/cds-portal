@@ -78,7 +78,7 @@ def JoinClassDialog(callback: callable = lambda: None):
 @solara.component
 def Page():
     classes = solara.use_reactive([])
-    selected_rows, set_selected_rows = solara.use_state([])
+    selected_rows, set_selected_rows = solara.use_state(None)
 
     def _retrieve_classes():
         print(BASE_API.load_student_info())
@@ -108,45 +108,37 @@ def Page():
                 rv.Spacer()
                 JoinClassDialog(callback=_retrieve_classes)
 
-            rv.DataTable(
-                items=classes.value,
-                single_select=False,
-                show_select=False,
-                v_model=selected_rows,
-                on_v_model=set_selected_rows,
-                headers=[
-                    {"text": "Date", "value": "date", "sortable": True},
-                    {
-                        "text": "Name",
-                        "align": "start",
-                        "sortable": True,
-                        "value": "name",
-                    },
-                    {"text": "Educator", "value": "educator"},
-                    {"text": "Code", "value": "code"},
-                    {"text": "", "value": "actions", "align": "end"},
-                ],
-                v_slots=[
-                    {
-                        "name": "item.actions",
-                        "variable": "y",
-                        "children": [
-                            solara.Button(
-                                "Launch",
-                                text=False,
-                                icon_name="mdi-pencil",
-                                # outlined=True,
-                                depressed=True,
-                                color="success",
-                                href=f"{settings.main.base_url}hubbles-law",
-                                target="_blank",
-                            ),
-                            # rv.Btn(
-                            #     icon=True,
-                            #     # on_click=lambda: print("Delete"),
-                            #     children=[rv.Icon(children=["mdi-delete"])],
-                            # ),
-                        ],
-                    },
-                ],
-            )
+            with rv.Card(outlined=True, flat=True):
+                with rv.Toolbar(flat=True, dense=True, class_="pa-0"):
+                    rv.Spacer()
+                    with rv.ToolbarItems():
+                        code = selected_rows[0]["code"] if selected_rows else None
+                        query_string = f"?class_code={code}" if code else ""
+                        solara.Button(
+                            "Launch",
+                            text=False,
+                            color="success",
+                            disabled=not bool(selected_rows),
+                            href=f"{settings.main.base_url}hubbles-law{query_string}",
+                            target="_blank"
+                        )
+
+                rv.DataTable(
+                    items=classes.value,
+                    single_select=True,
+                    show_select=True,
+                    v_model=selected_rows,
+                    on_v_model=set_selected_rows,
+                    headers=[
+                        {"text": "Date", "value": "date", "sortable": True},
+                        {
+                            "text": "Name",
+                            "align": "start",
+                            "sortable": True,
+                            "value": "name",
+                        },
+                        {"text": "Educator", "value": "educator"},
+                        {"text": "Code", "value": "code"},
+                        {"text": "", "value": "actions", "align": "end"},
+                    ],
+                )
